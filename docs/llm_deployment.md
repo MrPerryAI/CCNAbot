@@ -14,7 +14,7 @@ subnet, an IOS command's syntax, or a device's state from memory.
 | Machine | GPU | Usable for inference? |
 |---|---|---|
 | Master PC: 12th-gen i3/i5, 16 GB RAM | RTX 3050 (8 GB, or 6 GB on some cards) | Yes, fully on GPU |
-| 8 rack PCs | GeForce GT 710 (Kepler, 1–2 GB) | **No.** Ollama needs CUDA compute capability 5.0 or newer. The GT 710 is below that, so these PCs run on CPU only. |
+| 8 rack PCs: Ryzen 3 4100 (4 cores/8 threads, AVX2), 8 GB RAM, gigabit Ethernet, Linux Mint | GeForce GT 710 (Kepler GK208B, nouveau driver) | **No.** Ollama needs CUDA compute capability 5.0 or newer. The GT 710 is below that, so these PCs run on CPU only. |
 
 ## Recommended models
 
@@ -72,8 +72,16 @@ Check that nothing has spilled off the GPU: `ollama ps` should show
 `100% GPU` on the master. If you see a CPU/GPU split, lower `num_ctx` or
 `OLLAMA_NUM_PARALLEL`.
 
-## Before choosing
+## Decision for the Lenape racks
 
-Run `lscpu` and `free -g` on one rack PC. If it has an AVX2-capable CPU and
-8 GB or more of RAM, use the default. If not, drop to `qwen3.5:0.8b`, or
-skip local models and send every request to the master.
+The rack PCs (Ryzen 3 4100, 8 GB) can run `qwen3.5:2b`, but on 4 cores the
+model needs roughly 30–60 seconds just to read a full `show running-config`
+before it answers. A Cinnamon desktop already uses about 1.7 GB of the 8 GB.
+
+So: **master-only to start.** The rack PCs run no model; `ccnabot` on each
+rack sends requests to the master over the gigabit LAN. Add `qwen3.5:0.8b`
+on the racks later only if offline fallback turns out to matter.
+
+If the racks ever get local models, check that each has two RAM sticks
+(`sudo dmidecode -t memory`). On a single stick, CPU inference runs at about
+half speed.
