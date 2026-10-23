@@ -30,6 +30,8 @@ What exists today:
 | `scheduling/retention.py` | Optional spaced review of prior-year content |
 | `report.py` | The competency task list, for an instructor to review and sign |
 
+See `docs/llm_deployment.md` for which language models run on the master PC and the rack PCs.
+
 ## Design notes
 
 **Evidence is append-only.** Nothing about a student is stored as mutable
